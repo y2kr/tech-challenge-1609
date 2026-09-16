@@ -1,12 +1,12 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    rev: v0.16.8
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: end-of-file-fixer
@@ -16,4 +16,25 @@ repos:
     rev: 37290ec844a69c6498e9dc35b6c011d4890540a2
     hooks:
       - id: no-comments
-        files: ^(src|tests)/
+        files: ^(api|web)/
+  - repo: local
+    hooks:
+      - id: web-eslint
+        name: eslint
+        language: system
+        files: ^web/.*\.(ts|tsx|mjs)$
+        entry: bash -c 'cd web && exec pnpm exec eslint --max-warnings=0 --no-warn-ignored "${@/#web\//}"' --
+      - id: web-prettier
+        name: prettier
+        language: system
+        files: ^web/
+        exclude: ^web/(src/api/schema\.d\.ts|pnpm-lock\.yaml)$
+        types_or: [ts, tsx, javascript, json, css, yaml]
+        entry: bash -c 'cd web && exec pnpm exec prettier --check "${@/#web\//}"' --
+      - id: web-tsc
+        name: tsc
+        language: system
+        files: ^web/
+        types_or: [ts, tsx]
+        pass_filenames: false
+        entry: pnpm --dir web exec tsc --noEmit
